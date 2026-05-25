@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Scholar-Track — Priority & Recommendation Module
 
 > **Your module only.** This folder is self-contained and plugs into the shared Flask app.
@@ -301,3 +302,6 @@ git push origin feature/priority-module
 
 # 5. Open a Pull Request → ask Thinushanth to review app.py integration
 ```
+=======
+# ScholarTrack_BackEnd
+>>>>>>> e6bec361977f5b1a19a6b277575ee500205d3685

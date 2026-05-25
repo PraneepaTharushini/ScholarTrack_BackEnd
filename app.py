@@ -1,48 +1,62 @@
 import os
-
 from flask import Flask, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
 
-from extensions import db
-from routes import priority_bp
+from database import migrate
+from routes_auth import auth_bp
+from routes_tasks import tasks_bp
+from routes_analytics import analytics_bp
 
+load_dotenv()
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:lXkbAOtVInUIMHWZFygvINIaKGlspqwJ@tramway.proxy.rlwy.net:33180/railway",
-)
-
+# ── App factory ───────────────────────────────────────────────
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-CORS(app)
-db.init_app(app)
-app.register_blueprint(priority_bp, url_prefix="/api/priority")
+CORS(app, origins=[
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:4173",
+], supports_credentials=True)
 
-print("API ROUTES LOADED")
-print("REGISTERED ROUTES:", app.url_map)
+# ── Register blueprints ───────────────────────────────────────
+app.register_blueprint(auth_bp,      url_prefix="/api/auth")
+app.register_blueprint(tasks_bp,     url_prefix="/api/tasks")
+app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
 
-print("Trying to connect database...")
-
-try:
-    with app.app_context():
-        with db.engine.connect():
-            print("Database Connected Successfully!")
-except Exception as e:
-    print("Database Connection Error:")
-    print(e)
-
-@app.route('/')
-def home():
-    return "Flask is running!"
-
-# IMPORTANT ROUTE FOR REACT
-@app.route('/api/test')
-def test():
+# ── Health check ──────────────────────────────────────────────
+@app.route("/api/health")
+def health():
+    from datetime import datetime, timezone
     return jsonify({
-        "message": "Backend + Database connected successfully!"
+        "status":    "ok",
+        "service":   "Scholar Track API (Flask)",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     })
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=True, use_reloader=False)
+# ── 404 handler ───────────────────────────────────────────────
+@app.errorhandler(404)
+def not_found(_):
+    return jsonify({"error": "Route not found"}), 404
+
+# ── 500 handler ───────────────────────────────────────────────
+@app.errorhandler(Exception)
+def server_error(e):
+    print("Unhandled error:", e)
+    return jsonify({"error": "Internal server error"}), 500
+
+
+# ── Entry point ───────────────────────────────────────────────
+if __name__ == "__main__":
+    print("Running database migrations...")
+    migrate()
+
+    PORT = int(os.getenv("PORT", 5000))
+    print(f"\nScholar Track API (Flask) running at http://localhost:{PORT}")
+    print(f"   Health:    GET  /api/health")
+    print(f"   Auth:      POST /api/auth/register | /login  GET /me")
+    print(f"   Tasks:     GET/POST/PUT/DELETE /api/tasks")
+    print(f"   Analytics: GET  /api/analytics/summary | /status | /categories | /insights | /timeline\n")
+
+    app.run(host="0.0.0.0", port=PORT, debug=True)
+

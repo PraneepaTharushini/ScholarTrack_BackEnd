@@ -10,6 +10,7 @@ class User(db.Model):
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default="student")
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     def to_public_dict(self) -> dict:
@@ -17,5 +18,6 @@ class User(db.Model):
             "id": self.id,
             "name": self.name,
             "email": self.email,
+            "role": self.role,
             "created_at": self.created_at.isoformat(),
         }

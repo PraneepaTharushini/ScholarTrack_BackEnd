@@ -21,3 +21,16 @@ class User(db.Model):
             "role": self.role,
             "created_at": self.created_at.isoformat(),
         }
+
+
+class PasswordResetCode(db.Model):
+    __tablename__ = "password_reset_codes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    code_hash = db.Column(db.String(255), nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    used_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship("User", backref=db.backref("password_reset_codes", lazy=True))

@@ -1,8 +1,10 @@
 from app.analytics import analytics_bp
+from app.auth.routes import token_required
 
 
 @analytics_bp.get("/summary")
-def summary():
+@token_required
+def summary(user):
     return {
         "total": 24,
         "completed": 14,
@@ -12,7 +14,8 @@ def summary():
 
 
 @analytics_bp.get("/status")
-def status():
+@token_required
+def status(user):
     return {
         "status": [
             {"label": "Completed", "value": 14, "pct": 58, "color": "#22C55E"},
@@ -23,7 +26,8 @@ def status():
 
 
 @analytics_bp.get("/categories")
-def categories():
+@token_required
+def categories(user):
     return {
         "categories": [
             {"label": "Assignments", "count": 9},
@@ -35,7 +39,8 @@ def categories():
 
 
 @analytics_bp.get("/insights")
-def insights():
+@token_required
+def insights(user):
     return {
         "insights": [
             "Most pending work is grouped around assignments and projects.",
@@ -46,7 +51,8 @@ def insights():
 
 
 @analytics_bp.get("/timeline")
-def timeline():
+@token_required
+def timeline(user):
     return {
         "timeline": [
             {"label": "Week 1", "completed": 3, "created": 5},

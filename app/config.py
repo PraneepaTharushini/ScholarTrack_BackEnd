@@ -15,6 +15,7 @@ class Config:
         )
         self.SQLALCHEMY_TRACK_MODIFICATIONS = False
         self.CREATE_DB_ON_START = os.getenv("CREATE_DB_ON_START", "0") == "1"
+        self.JWT_EXPIRATION_SECONDS = int(os.getenv("JWT_EXPIRATION_SECONDS", str(60 * 60 * 24)))
         self.SMTP_HOST = os.getenv("SMTP_HOST", "")
         self.SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
         self.SMTP_USERNAME = os.getenv("SMTP_USERNAME", "")
